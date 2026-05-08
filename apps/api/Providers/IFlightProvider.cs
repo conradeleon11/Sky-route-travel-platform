@@ -5,6 +5,12 @@ namespace Api.Providers
     public interface IFlightProvider
     {
         string Name { get; }
-        Task<List<Flight>> SearchFlightsAsync(string origin, string destination);
+        Task<List<FlightSearchResponse>> SearchFlightsAsync(
+            string origin,
+            string destination,
+            DateTime departureDate,
+            int passengers,
+            string cabinClass);
     }
 }
+
