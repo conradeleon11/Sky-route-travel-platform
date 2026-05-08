@@ -1,3 +1,6 @@
+using Api.Providers;
+using Api.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
@@ -10,6 +13,10 @@ builder.Services.AddCors(options =>
                         .AllowAnyMethod()
                         .AllowAnyHeader());
 });
+
+builder.Services.AddScoped<IFlightProvider, GlobalAirProvider>();
+builder.Services.AddScoped<IFlightProvider, BudgetWingsProvider>();
+builder.Services.AddScoped<FlightService>();
 
 var app = builder.Build();
 
