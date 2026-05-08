@@ -8,9 +8,9 @@ namespace Api.Controllers
     [Route("api/[controller]")]
     public class FlightsController : ControllerBase
     {
-        private readonly FlightService _flightService;
+        private readonly IFlightService _flightService;
 
-        public FlightsController(FlightService flightService)
+        public FlightsController(IFlightService flightService)
         {
             _flightService = flightService;
         }
@@ -33,6 +33,19 @@ namespace Api.Controllers
                 origin, destination, departureDate, passengers, cabinClass);
 
             return Ok(results);
+        }
+
+        [HttpPost("book")]
+        public async Task<ActionResult<BookingResponse>> BookFlight([FromBody] BookingRequest request)
+        {
+            if (string.IsNullOrEmpty(request.FullName) || string.IsNullOrEmpty(request.Email))
+            {
+                return BadRequest("Passenger details are required.");
+            }
+
+            var response = await _flightService.CreateBooking(request);
+
+            return Ok(response);
         }
     }
 }

@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IFlightProvider, GlobalAirProvider>();
 builder.Services.AddScoped<IFlightProvider, BudgetWingsProvider>();
-builder.Services.AddScoped<FlightService>();
+builder.Services.AddScoped<IFlightService, FlightService>();
 
 var app = builder.Build();
 
