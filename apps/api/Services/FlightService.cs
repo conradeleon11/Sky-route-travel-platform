@@ -3,7 +3,7 @@ using Api.Providers;
 
 namespace Api.Services
 {
-    public class FlightService
+    public class FlightService : IFlightService
     {
         private readonly IEnumerable<IFlightProvider> _providers;
 
@@ -28,6 +28,19 @@ namespace Api.Services
                 .SelectMany(f => f)
                 .OrderBy(f => f.TotalPrice)
                 .ToList();
+        }
+
+        public async Task<BookingResponse> CreateBooking(BookingRequest request)
+        {
+            // Code (eg: SK-XJ92)
+            string reference = $"SK-{Guid.NewGuid().ToString().Substring(0, 4).ToUpper()}";
+
+            return new BookingResponse
+            {
+                BookingReference = reference,
+                BookingDate = DateTime.UtcNow,
+                Status = "Confirmed"
+            };
         }
     }
 }
