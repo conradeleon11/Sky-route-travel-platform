@@ -6,20 +6,21 @@ namespace Api.Providers
     {
         public string Name => "GlobalAir";
 
-        public async Task<List<Flight>> SearchFlightsAsync(string origin, string destination)
+        public async Task<List<FlightSearchResponse>> SearchFlightsAsync(string origin, string destination, DateTime departureDate, int passengers, string cabinClass)
         {
             var baseFare = 200m;
-            var finalPrice = Math.Round(baseFare * 1.15m, 2); // Rule: +15%
+            decimal pricePerPerson = Math.Round(baseFare * 1.15m, 2);  // Rule: +15% , 2 decimals rounded
 
-            return new List<Flight>
-            {
-                new Flight {
+            return new List<FlightSearchResponse> {
+                new FlightSearchResponse {
                     ProviderName = Name,
-                    FlightNumber = "GA-123",
-                    Origin = origin,
-                    Destination = destination,
-                    BaseFare = baseFare,
-                    FinalPrice = finalPrice
+                    FlightNumber = "GA-101",
+                    DepartureTime = departureDate.AddHours(10),
+                    ArrivalTime = departureDate.AddHours(13),
+                    Duration = "3h 0m",
+                    CabinClass = cabinClass,
+                    PricePerPassenger = pricePerPerson,
+                    TotalPrice = pricePerPerson * passengers
                 }
             };
         }

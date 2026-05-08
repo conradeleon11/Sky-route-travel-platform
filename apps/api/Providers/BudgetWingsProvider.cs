@@ -6,25 +6,36 @@ namespace Api.Providers
     {
         public string Name => "BudgetWings";
 
-        public async Task<List<Flight>> SearchFlightsAsync(string origin, string destination)
+        public async Task<List<FlightSearchResponse>> SearchFlightsAsync(
+            string origin,
+            string destination,
+            DateTime departureDate,
+            int passengers,
+            string cabinClass)
         {
-            await Task.Delay(100);
-
-            var baseFare = 40m;
-            
-            // Rule: -10% minimum $29.99
-            var discounted = baseFare * 0.90m;
-            var finalPrice = Math.Max(discounted, 29.99m);
-
-            return new List<Flight>
+            decimal baseFare = cabinClass switch
             {
-                new Flight {
+                "First Class" => 250m,
+                "Business" => 120m,
+                _ => 50m // Economy
+            };
+
+            // Rule: -10% minimum $29.99
+            decimal discountedPrice = baseFare * 0.90m;
+            var pricePerPassenger = Math.Max(discountedPrice, 29.99m);
+
+            return new List<FlightSearchResponse>
+            {
+                new FlightSearchResponse
+                {
                     ProviderName = Name,
-                    FlightNumber = "BW-999",
-                    Origin = origin,
-                    Destination = destination,
-                    BaseFare = baseFare,
-                    FinalPrice = finalPrice
+                    FlightNumber = "BW-502",
+                    DepartureTime = departureDate.AddHours(14),
+                    ArrivalTime = departureDate.AddHours(17).AddMinutes(45),
+                    Duration = "3h 45m",
+                    CabinClass = cabinClass,
+                    PricePerPassenger = pricePerPassenger,
+                    TotalPrice = Math.Round(pricePerPassenger * passengers, 2)
                 }
             };
         }
