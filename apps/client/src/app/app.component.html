@@ -1,0 +1,61 @@
+<div class="container">
+  <h1>SkyRoute Flight Search</h1>
+
+  <!-- Search Form -->
+  <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+    <div class="form-group">
+      <label>Origin</label>
+      <input formControlName="origin" placeholder="e.g. MEX" />
+    </div>
+
+    <div class="form-group">
+      <label>Destination</label>
+      <input formControlName="destination" placeholder="e.g. BUE" />
+    </div>
+
+    <div class="form-group">
+      <label>Date</label>
+      <input type="date" formControlName="departureDate" />
+    </div>
+
+    <div class="form-group">
+      <label>Passengers</label>
+      <input type="number" formControlName="passengers" />
+    </div>
+
+    <div class="form-group">
+      <label>Class</label>
+      <select formControlName="cabinClass">
+        <option value="Economy">Economy</option>
+        <option value="Business">Business</option>
+        <option value="First Class">First Class</option>
+      </select>
+    </div>
+
+    <button type="submit" [disabled]="searchForm.invalid || loading">
+      {{ loading ? 'Searching...' : 'Find Flights' }}
+    </button>
+  </form>
+
+  <hr />
+
+  <!-- Results List -->
+  <div *ngIf="flights.length > 0" class="results">
+    <h2>Available Flights</h2>
+    <div *ngFor="let flight of flights" class="flight-card">
+      <div class="flight-info">
+        <strong>{{ flight.providerName }}</strong> - {{ flight.flightNumber }}
+        <p>{{ flight.cabinClass }} | {{ flight.duration }}</p>
+      </div>
+      <div class="flight-price">
+        <p>Per Person: ${{ flight.pricePerPassenger }}</p>
+        <h3>Total: ${{ flight.totalPrice }}</h3>
+        <button (click)="onBook(flight)">Book Now</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="flights.length === 0 && !loading" class="no-results">
+    <p>No flights found. Try a new search!</p>
+  </div>
+</div>

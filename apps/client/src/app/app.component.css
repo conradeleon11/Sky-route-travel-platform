@@ -1,0 +1,6 @@
+.container { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+.search-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; background: #f4f4f4; padding: 20px; border-radius: 8px; }
+.form-group { display: flex; flex-direction: column; }
+.flight-card { display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; }
+button { cursor: pointer; background: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; }
+button:disabled { background: #ccc; }
