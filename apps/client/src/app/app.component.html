@@ -1,0 +1,40 @@
+<div class="container">
+  <header>
+    <h1>SkyRoute Flight Search</h1>
+  </header>
+
+  <app-flight-search 
+    [airports]="airports" 
+    [loading]="loading()" 
+    [resetTrigger]="searchResetCounter()" 
+    (search)="onSearch($event)">
+  </app-flight-search>
+
+  <app-flight-results 
+    *ngIf="flights().length > 0"
+    [flights]="flights()" 
+    (sort)="onSort($event)"
+    (book)="onBook($event)">
+  </app-flight-results>
+
+  <div *ngIf="searchPerformed() && flights().length === 0 && !loading()" class="no-results-card">
+    <div class="no-results-icon">🔍</div>
+    <p>No flights found. Try a new search!</p>
+  </div>
+
+  <app-booking-form 
+    *ngIf="isBooking()"
+    [flight]="selectedFlight"
+    [origin]="lastSearchParams?.origin" 
+    [destination]="lastSearchParams?.destination"
+    [isInternational]="isInternational"
+    [numPassengers]="lastSearchParams?.passengers || 1"
+    [loading]="loading()"
+    (confirm)="confirmBooking($event)"
+    (cancel)="cancelBooking()">
+  </app-booking-form>
+
+  <div *ngIf="bookingStatus()" class="status-toast" [class.error]="bookingStatus()?.includes('Error')">
+    {{ bookingStatus() }}
+  </div>
+</div>
