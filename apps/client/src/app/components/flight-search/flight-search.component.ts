@@ -17,6 +17,18 @@ export class FlightSearchComponent {
 
   @Output() search = new EventEmitter<any>();
 
+  @Input() set resetTrigger(value: number) {
+    if (value > 0) {
+      this.searchForm.reset({
+        origin: '',
+        destination: '',
+        departureDate: '',
+        passengers: 1,
+        cabinClass: 'Economy'
+      });
+    }
+  }
+
   searchForm = this.fb.group({
     origin: ['', Validators.required],
     destination: ['', Validators.required],
