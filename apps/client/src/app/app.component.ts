@@ -1,20 +1,21 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FlightService } from './services/flight';
 import { FlightSearchResponse } from './models/flight.model';
 import { CommonModule } from '@angular/common';
 import { BookingRequest } from './models/flight.model';
 import { delay, finalize } from 'rxjs/operators';
+import { FlightSearchComponent } from './components/flight-search/flight-search.component';
+import { FlightResultsComponent } from './components/flight-results/flight-results.component';
+import { BookingFormComponent } from './components/booking-form/booking-form.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FlightSearchComponent, FlightResultsComponent, BookingFormComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  private fb = inject(FormBuilder);
   private flightService = inject(FlightService);
   selectedFlight: FlightSearchResponse | null = null;
   flights = signal<FlightSearchResponse[]>([]);
@@ -22,6 +23,8 @@ export class AppComponent {
   isBooking = signal<boolean>(false);
   bookingStatus = signal<string | null>(null);
   searchPerformed = signal<boolean>(false);
+
+  lastSearchParams: any = null;
 
   airports = [
     { code: 'EZE', name: 'Ezeiza, Buenos Aires (ARG)' },
@@ -38,60 +41,40 @@ export class AppComponent {
   };
 
   get isInternational(): boolean {
-    if (!this.selectedFlight || !this.searchForm.value.origin || !this.searchForm.value.destination) return false;
-    
-    const originCountry = this.airportCountryMap[this.searchForm.value.origin];
-    const destCountry = this.airportCountryMap[this.searchForm.value.destination];
-    
+    if (!this.lastSearchParams || !this.selectedFlight) return false;
+
+    const origin = this.lastSearchParams.origin;
+    const destination = this.lastSearchParams.destination;
+
+    const originCountry = this.airportCountryMap[origin];
+    const destCountry = this.airportCountryMap[destination];
+
     return originCountry !== destCountry;
   }
 
-  searchForm = this.fb.group({
-    origin: ['', [Validators.required, Validators.minLength(3)]],
-    destination: ['', [Validators.required, Validators.minLength(3)]],
-    departureDate: ['', Validators.required],
-    passengers: [1, [Validators.required, Validators.min(1), Validators.max(9)]],
-    cabinClass: ['Economy', Validators.required]
-  });
-
-  bookingForm = this.fb.group({
-    fullName: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    documentNumber: ['', Validators.required]
-  });
-
-  onSearch() {
-    if (this.searchForm.invalid) return;
-
+ onSearch(formData: any) {
+    this.lastSearchParams = formData;
     this.searchPerformed.set(true);
     this.loading.set(true);
     this.flights.set([]);
     this.bookingStatus.set(null);
 
-    const val = this.searchForm.value;
-
     this.flightService.searchFlights(
-      val.origin!,
-      val.destination!,
-      val.departureDate!,
-      val.passengers!,
-      val.cabinClass!
+      formData.origin,
+      formData.destination,
+      formData.departureDate,
+      formData.passengers,
+      formData.cabinClass
     ).pipe(
       delay(800),
       finalize(() => this.loading.set(false))
-    )
-      .subscribe({
-        next: (data) => {
-          console.log('Data received:', data);
-          this.flights.set(data);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          console.error('Search failed:', err);
-          alert('Error fetching flights. Is the backend running?');
-          this.loading.set(false);
-        }
-      });
+    ).subscribe({
+      next: (data) => {
+        console.log('Resultados de API:', data);
+        this.flights.set(data);
+      },
+      error: (err) => console.error('Error en API:', err)
+    });
   }
 
   onSort(criteria: string) {
@@ -100,8 +83,6 @@ export class AppComponent {
     if (criteria === 'price') {
       sorted.sort((a, b) => a.totalPrice - b.totalPrice);
     } else if (criteria === 'duration') {
-      // Esto asume que duration viene como "3h 45m". 
-      // Para simplificar, ordenamos por el string o puedes parsearlo.
       sorted.sort((a, b) => a.duration.localeCompare(b.duration));
     } else if (criteria === 'departure') {
       sorted.sort((a, b) => new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime());
@@ -114,23 +95,10 @@ export class AppComponent {
     this.selectedFlight = flight;
     this.isBooking.set(true);
     this.bookingStatus.set(null);
-    
-    const docControl = this.bookingForm.get('documentNumber');
-    docControl?.reset();
-
-    if (this.isInternational) {
-      // Passport validation alphanumeric
-      docControl?.setValidators([Validators.required, Validators.pattern('^[A-Z0-9]{6,12}$')]);
-    } else {
-      // National flights validation ID
-      docControl?.setValidators([Validators.required, Validators.pattern('^[0-9]{7,10}$')]);
-    }
-    
-    docControl?.updateValueAndValidity();
   }
 
-  confirmBooking() {
-    if (this.bookingForm.invalid || !this.selectedFlight) return;
+  confirmBooking(passengerData: any) {
+    if (!this.selectedFlight) return;
 
     this.loading.set(true);
     this.bookingStatus.set(null);
@@ -138,9 +106,9 @@ export class AppComponent {
     const request: BookingRequest = {
       flightNumber: this.selectedFlight.flightNumber,
       providerName: this.selectedFlight.providerName,
-      fullName: this.bookingForm.value.fullName!,
-      email: this.bookingForm.value.email!,
-      documentNumber: this.bookingForm.value.documentNumber!
+      fullName: passengerData.fullName,
+      email: passengerData.email,
+      documentNumber: passengerData.documentNumber
     };
 
     this.flightService.bookFlight(request)
@@ -152,10 +120,8 @@ export class AppComponent {
       next: (res) => {
         this.bookingStatus.set(`Success! Ref: ${res.bookingReference}`);
         this.isBooking.set(false);
-        this.loading.set(false);
         this.flights.set([]);
 
-        this.bookingForm.reset();
         this.selectedFlight = null;
         setTimeout(() => this.bookingStatus.set(null), 5000);
       },
@@ -170,6 +136,5 @@ export class AppComponent {
   cancelBooking() {
     this.isBooking.set(false);
     this.selectedFlight = null;
-    this.bookingForm.reset();
   }
 }

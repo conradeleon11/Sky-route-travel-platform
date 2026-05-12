@@ -1,0 +1,48 @@
+<section class="search-section">
+  <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Origin</label>
+        <select formControlName="origin">
+          <option value="" disabled>Select Airport</option>
+          <option *ngFor="let ap of airports" [value]="ap.code">({{ap.code}}) {{ap.name}}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Destination</label>
+        <select formControlName="destination">
+          <option value="" disabled>Select Airport</option>
+          <option *ngFor="let ap of airports" [value]="ap.code">({{ap.code}}) {{ap.name}}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Departure Date</label>
+        <input type="date" formControlName="departureDate" />
+      </div>
+
+      <div class="form-group">
+        <label>Passengers</label>
+        <input type="number" formControlName="passengers" min="1" max="9" />
+        <small class="error-text" *ngIf="searchForm.get('passengers')?.errors?.['max']">
+          Max 9 allowed.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Class</label>
+        <select formControlName="cabinClass">
+          <option value="Economy">Economy</option>
+          <option value="Business">Business</option>
+          <option value="First Class">First Class</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-primary main-search-btn" [disabled]="searchForm.invalid || loading">
+      <span *ngIf="!loading">Find Flights</span>
+      <span *ngIf="loading" class="loader-text">Searching...</span>
+    </button>
+  </form>
+</section>
