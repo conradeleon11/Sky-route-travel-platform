@@ -4,6 +4,7 @@ import { FlightService } from './services/flight';
 import { FlightSearchResponse } from './models/flight.model';
 import { CommonModule } from '@angular/common';
 import { BookingRequest } from './models/flight.model';
+import { delay, finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -20,6 +21,16 @@ export class AppComponent {
   loading = signal<boolean>(false);
   isBooking = signal<boolean>(false);
   bookingStatus = signal<string | null>(null);
+  searchPerformed = signal<boolean>(false);
+
+  airports = [
+    { code: 'EZE', name: 'Ezeiza, Buenos Aires (ARG)' },
+    { code: 'AEP', name: 'Aeroparque, Buenos Aires (ARG)' },
+    { code: 'COR', name: 'Pajas Blancas, Córdoba (ARG)' },
+    { code: 'MEX', name: 'Benito Juárez, Ciudad de México (MEX)' },
+    { code: 'CUN', name: 'Cancún International (MEX)' },
+    { code: 'GDL', name: 'Miguel Hidalgo, Guadalajara (MEX)' }
+  ];
 
   searchForm = this.fb.group({
     origin: ['', [Validators.required, Validators.minLength(3)]],
@@ -38,6 +49,7 @@ export class AppComponent {
   onSearch() {
     if (this.searchForm.invalid) return;
 
+    this.searchPerformed.set(true);
     this.loading.set(true);
     this.flights.set([]);
     this.bookingStatus.set(null);
@@ -50,18 +62,38 @@ export class AppComponent {
       val.departureDate!,
       val.passengers!,
       val.cabinClass!
-    ).subscribe({
-      next: (data) => {
-        console.log('Data received:', data);
-        this.flights.set(data);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error('Search failed:', err);
-        alert('Error fetching flights. Is the backend running?');
-        this.loading.set(false);
-      }
-    });
+    ).pipe(
+      delay(800),
+      finalize(() => this.loading.set(false))
+    )
+      .subscribe({
+        next: (data) => {
+          console.log('Data received:', data);
+          this.flights.set(data);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Search failed:', err);
+          alert('Error fetching flights. Is the backend running?');
+          this.loading.set(false);
+        }
+      });
+  }
+
+  onSort(criteria: string) {
+    const sorted = [...this.flights()]; // Copia del array
+    
+    if (criteria === 'price') {
+      sorted.sort((a, b) => a.totalPrice - b.totalPrice);
+    } else if (criteria === 'duration') {
+      // Esto asume que duration viene como "3h 45m". 
+      // Para simplificar, ordenamos por el string o puedes parsearlo.
+      sorted.sort((a, b) => a.duration.localeCompare(b.duration));
+    } else if (criteria === 'departure') {
+      sorted.sort((a, b) => new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime());
+    }
+    
+    this.flights.set(sorted);
   }
 
   onBook(flight: FlightSearchResponse) {
@@ -69,6 +101,7 @@ export class AppComponent {
     this.isBooking.set(true);
     this.bookingStatus.set(null);
   }
+
   confirmBooking() {
     if (this.bookingForm.invalid || !this.selectedFlight) return;
 

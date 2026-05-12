@@ -5,22 +5,30 @@
   <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
     <div class="form-group">
       <label>Origin</label>
-      <input formControlName="origin" placeholder="e.g. MEX" />
+      <select formControlName="origin">
+        <option value="" disabled>Select Airport</option>
+        <option *ngFor="let ap of airports" [value]="ap.code">({{ap.code}}) {{ap.name}}</option>
+      </select>
     </div>
 
     <div class="form-group">
       <label>Destination</label>
-      <input formControlName="destination" placeholder="e.g. BUE" />
+      <select formControlName="destination">
+        <option value="" disabled>Select Airport</option>
+        <option *ngFor="let ap of airports" [value]="ap.code">({{ap.code}}) {{ap.name}}</option>
+      </select>
     </div>
-
     <div class="form-group">
-      <label>Date</label>
+      <label>Departure Date</label>
       <input type="date" formControlName="departureDate" />
     </div>
 
     <div class="form-group">
       <label>Passengers</label>
-      <input type="number" formControlName="passengers" />
+      <input type="number" formControlName="passengers" min="1" max="9" />
+      <small *ngIf="searchForm.get('passengers')?.errors?.['max']" style="color: red;">
+        Max 9 passengers allowed.
+      </small>
     </div>
 
     <div class="form-group">
@@ -40,15 +48,29 @@
   <hr />
 
   <!-- Results List -->
-   
 
+  <div *ngIf="flights().length > 0" class="sort-options">
+    <label>Sort by:</label>
+    <select (change)="onSort($any($event.target).value)">
+      <option value="price">Lowest Price</option>
+      <option value="duration">Shortest Duration</option>
+      <option value="departure">Departure Time</option>
+    </select>
+  </div>
   <div *ngIf="flights().length > 0" class="results">
     <h2>Available Flights</h2>
-    
-    <div *ngFor="let flight of flights()" class="flight-card">
+
+    <div *ngFor="let flight of flights()" class="flight-card mt-2">
       <div class="flight-info">
         <strong>{{ flight.providerName }}</strong> - {{ flight.flightNumber }}
         <p>{{ flight.cabinClass }} | {{ flight.duration }}</p>
+        <hr />
+        <div>
+          <p class="time">Departure: {{ flight.departureTime | date:'HH:mm' }}, {{ flight.departureTime | date:'dd MMM' }}</p>
+        </div>
+        <div>
+          <p class="time">Arrival: {{ flight.arrivalTime | date:'HH:mm' }}, {{ flight.arrivalTime | date:'dd MMM' }}</p>
+        </div>
       </div>
       <div class="flight-price">
         <p>Per Person: ${{ flight.pricePerPassenger }}</p>
@@ -58,12 +80,13 @@
     </div>
   </div>
 
-  <div *ngIf="flights().length === 0 && !loading() && !bookingStatus()" class="no-results">
+  <div *ngIf="searchPerformed() && flights().length === 0 && !loading()" class="no-results">
     <p>No flights found. Try a new search!</p>
   </div>
 </div>
 
-<div *ngIf="isBooking()" class="booking-modal" style="background: #eee; padding: 20px; border-radius: 8px; margin-top: 20px;">
+<div *ngIf="isBooking()" class="booking-modal"
+  style="background: #eee; padding: 20px; border-radius: 8px; margin-top: 20px;">
   <h2>Complete your booking for {{ selectedFlight?.flightNumber }}</h2>
   <p>Provider: {{ selectedFlight?.providerName }} | Price: ${{ selectedFlight?.totalPrice }}</p>
 
@@ -72,7 +95,7 @@
       <label>Full Name</label>
       <input formControlName="fullName" placeholder="John Doe" />
     </div>
-    
+
     <div class="form-group">
       <label>Email</label>
       <input type="email" formControlName="email" placeholder="john@example.com" />
