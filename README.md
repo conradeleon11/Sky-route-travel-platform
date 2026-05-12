@@ -9,7 +9,7 @@ SkyRoute is a modern web application built with **Angular 18+** that allows user
 ### Prerequisites
 * **Node.js**: v18.x or higher
 * **npm**: v9.x or higher
-* **.NET 10.0 SDK**: Installed globally (`npm install -g @angular/cli`)
+* **.NET 10.0 SDK**
 
 ### Installation and Execution
 1. Clone the repository:
