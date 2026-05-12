@@ -32,11 +32,25 @@ SkyRoute is a modern web application built with **Angular 18+** that allows user
 
 ---
 
+### Api Unit Testing
+1. Run tests:
+   ```bash
+   cd apps/api.tests
+   dotnet test
+
+---
+
 ## 🏗 Architecture Decisions
 
 The project follows **Clean Architecture** and **Component-Based Design** principles to ensure high maintainability and scalability:
 
-### 1. Component Decomposition (Smart vs. Dumb)
+
+
+### 1. Strategy Pattern (Flight Providers)
+Strategy Pattern was choosen to manage multiple flight providers. This decouples the core search engine from the specific API implementations of different airlines. It allows us to add or swap providers dynamically without modifying the main service logic, ensuring the system remains compliant with the Open/Closed Principle.
+
+
+### 2. Component Decomposition (Smart vs. Dumb)
 The initial monolithic logic was refactored into a hierarchical structure:
 *   **Smart Component (`AppComponent`):** Acts as the state orchestrator, managing service communication and data flow between children.
 *   **Dumb/Presentational Components:**
@@ -44,10 +58,10 @@ The initial monolithic logic was refactored into a hierarchical structure:
     *   `FlightResultsComponent`: Responsible for displaying and sorting the received flight data.
     *   `BookingFormComponent`: Centralizes booking logic and dynamic document validation.
 
-### 2. State Management with Angular Signals
+### 3. State Management with Angular Signals
 The application leverages **Signals** for reactive state management. This approach provides more efficient change detection and a clearer unidirectional data flow, significantly reducing the cognitive load when tracing UI updates.
 
-### 3. Contextual Dynamic Validations
+### 4. Contextual Dynamic Validations
 The system automatically detects if a flight is **international** by comparing airport codes (e.g., EZE vs. MEX) to adjust validation rules in real-time:
 *   **Domestic:** Requires a National ID (7-10 numeric digits).
 *   **International:** Requires a Passport (6-12 alphanumeric characters including at least one letter).
@@ -57,7 +71,7 @@ The system automatically detects if a flight is **international** by comparing a
 ## ⚖ Trade-offs & Known Limitations
 
 ### Trade-offs
-*   **Encapsulated CSS vs. Utility Classes:** I chose **Emulated Encapsulation** (component-specific CSS files) over libraries like Tailwind. This slightly increases the file count but prevents styles from the booking card from accidentally leaking into the search engine, ensuring easier long-term maintenance.
+*   **Strategy vs. Simple Service:** While the Strategy pattern adds more files/interfaces initially, it was chosen over a single service to prevent "God Classes" as more airline APIs are integrated.
 *   **Input-Driven Reset vs. ViewChild:** I opted for a `resetTrigger` based on Inputs rather than `@ViewChild` to clear the search form. While this adds a state variable, it avoids "undefined" reference errors when components are dynamically hidden or shown using `*ngIf`.
 
 ### Known Limitations
