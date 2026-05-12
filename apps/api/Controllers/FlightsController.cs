@@ -23,7 +23,6 @@ namespace Api.Controllers
             [FromQuery] int passengers = 1,
             [FromQuery] string cabinClass = "Economy")
         {
-            // Validación básica de pasajeros
             if (passengers < 1 || passengers > 9)
             {
                 return BadRequest("Number of passengers must be between 1 and 9.");

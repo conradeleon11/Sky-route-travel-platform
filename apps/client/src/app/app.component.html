@@ -32,17 +32,20 @@
       </select>
     </div>
 
-    <button type="submit" [disabled]="searchForm.invalid || loading">
-      {{ loading ? 'Searching...' : 'Find Flights' }}
+    <button type="submit" [disabled]="searchForm.invalid || loading()">
+      {{ loading() ? 'Searching...' : 'Find Flights' }}
     </button>
   </form>
 
   <hr />
 
   <!-- Results List -->
-  <div *ngIf="flights.length > 0" class="results">
+   
+
+  <div *ngIf="flights().length > 0" class="results">
     <h2>Available Flights</h2>
-    <div *ngFor="let flight of flights" class="flight-card">
+    
+    <div *ngFor="let flight of flights()" class="flight-card">
       <div class="flight-info">
         <strong>{{ flight.providerName }}</strong> - {{ flight.flightNumber }}
         <p>{{ flight.cabinClass }} | {{ flight.duration }}</p>
@@ -55,7 +58,7 @@
     </div>
   </div>
 
-  <div *ngIf="flights.length === 0 && !loading" class="no-results">
+  <div *ngIf="flights().length === 0 && !loading()" class="no-results">
     <p>No flights found. Try a new search!</p>
   </div>
 </div>
