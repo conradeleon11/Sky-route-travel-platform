@@ -1,6 +1,6 @@
 # SkyRoute - Flight Search & Booking System
 
-SkyRoute is a modern web application built with **Angular 18+** that allows users to search for flights between Argentina and Mexico, compare options, and complete bookings in real-time.
+SkyRoute is a modern web application built with **Angular 18+** and **.Net 10** that allows users to search for flights between Argentina and Mexico, compare options, and complete bookings in real-time.
 
 ---
 
