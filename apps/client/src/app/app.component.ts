@@ -32,6 +32,20 @@ export class AppComponent {
     { code: 'GDL', name: 'Miguel Hidalgo, Guadalajara (MEX)' }
   ];
 
+  airportCountryMap: { [key: string]: string } = {
+    'EZE': 'ARG', 'AEP': 'ARG', 'COR': 'ARG',
+    'MEX': 'MEX', 'CUN': 'MEX', 'GDL': 'MEX'
+  };
+
+  get isInternational(): boolean {
+    if (!this.selectedFlight || !this.searchForm.value.origin || !this.searchForm.value.destination) return false;
+    
+    const originCountry = this.airportCountryMap[this.searchForm.value.origin];
+    const destCountry = this.airportCountryMap[this.searchForm.value.destination];
+    
+    return originCountry !== destCountry;
+  }
+
   searchForm = this.fb.group({
     origin: ['', [Validators.required, Validators.minLength(3)]],
     destination: ['', [Validators.required, Validators.minLength(3)]],
@@ -100,12 +114,26 @@ export class AppComponent {
     this.selectedFlight = flight;
     this.isBooking.set(true);
     this.bookingStatus.set(null);
+    
+    const docControl = this.bookingForm.get('documentNumber');
+    docControl?.reset();
+
+    if (this.isInternational) {
+      // Passport validation alphanumeric
+      docControl?.setValidators([Validators.required, Validators.pattern('^[A-Z0-9]{6,12}$')]);
+    } else {
+      // National flights validation ID
+      docControl?.setValidators([Validators.required, Validators.pattern('^[0-9]{7,10}$')]);
+    }
+    
+    docControl?.updateValueAndValidity();
   }
 
   confirmBooking() {
     if (this.bookingForm.invalid || !this.selectedFlight) return;
 
     this.loading.set(true);
+    this.bookingStatus.set(null);
 
     const request: BookingRequest = {
       flightNumber: this.selectedFlight.flightNumber,
@@ -115,7 +143,12 @@ export class AppComponent {
       documentNumber: this.bookingForm.value.documentNumber!
     };
 
-    this.flightService.bookFlight(request).subscribe({
+    this.flightService.bookFlight(request)
+    .pipe(
+      delay(800),
+      finalize(() => this.loading.set(false))
+    )
+    .subscribe({
       next: (res) => {
         this.bookingStatus.set(`Success! Ref: ${res.bookingReference}`);
         this.isBooking.set(false);
@@ -124,6 +157,7 @@ export class AppComponent {
 
         this.bookingForm.reset();
         this.selectedFlight = null;
+        setTimeout(() => this.bookingStatus.set(null), 5000);
       },
       error: (err) => {
         console.error('Booking error', err);
