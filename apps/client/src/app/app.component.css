@@ -1,6 +1,3 @@
-/* button { cursor: pointer; background: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; }
-button:disabled { background: #ccc; }  */
-
 :host {
   --primary: #003580;
   --secondary: #006ce4;
@@ -262,8 +259,6 @@ input, select {
   .flight-timeline { margin: 1.5rem 0; }
 }
 
-/* ... (tus otros estilos) ... */
-
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -271,7 +266,6 @@ input, select {
   margin-top: 2rem;
 }
 
-/* Botón de Confirmar (Acción principal) */
 .btn-primary {
   background: var(--secondary);
   color: white;
@@ -293,7 +287,6 @@ input, select {
   cursor: not-allowed;
 }
 
-/* Botón de Cancelar (Acción secundaria) */
 .btn-secondary {
   background: transparent;
   color: #666;
@@ -311,7 +304,6 @@ input, select {
   border-color: #999;
 }
 
-/* Estilo para el "Confirming..." */
 .loader-text {
   display: flex;
   align-items: center;
@@ -375,7 +367,7 @@ input, select {
 .booking-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start; /* Alinea el título y el cierre arriba */
+  align-items: flex-start;
   margin-bottom: 1.5rem;
   position: relative;
 }
@@ -388,7 +380,7 @@ input, select {
   color: #999;
   cursor: pointer;
   padding: 0;
-  margin-top: -5px; /* Ajuste fino para alinearlo visualmente con el texto */
+  margin-top: -5px;
   transition: color 0.2s;
 }
 
@@ -403,7 +395,59 @@ input, select {
   margin-top: 0.25rem;
 }
 
-/* Opcional: Resaltar el input si es inválido y fue tocado */
 input.ng-invalid.ng-touched {
   border-color: #dc3545;
+}
+
+.flight-summary-box {
+  background: #f0f4f8;
+  padding: 1.2rem;
+  border-radius: 10px;
+  border-left: 5px solid var(--secondary);
+  margin-bottom: 1.5rem;
+}
+
+.route-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.airport-code {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 1px;
+}
+
+.route-separator {
+  margin: 0 10px;
+  color: var(--secondary);
+  font-size: 1.2rem;
+}
+
+.provider-info {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.time-info {
+  margin: 4px 0 0 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.time-range {
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-right: 8px;
+}
+
+.duration-tag {
+  background: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
 }

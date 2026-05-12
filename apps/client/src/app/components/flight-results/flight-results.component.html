@@ -1,0 +1,55 @@
+<div class="results-container">
+  <div class="results-header">
+    <h2>Available Flights</h2>
+    <div class="sort-box">
+      <label>Sort by:</label>
+      <select (change)="onSortChange($event)">
+        <option value="price">Lowest Price</option>
+        <option value="duration">Shortest Duration</option>
+        <option value="departure">Departure Time</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="results-grid">
+    <div *ngFor="let flight of flights" class="flight-card">
+      <div class="airline-info">
+        <div class="airline-logo">✈</div>
+        <div>
+          <span class="provider-name">{{ flight.providerName }}</span>
+          <span class="flight-id">{{ flight.flightNumber }}</span>
+        </div>
+      </div>
+
+      <div class="flight-timeline">
+        <div class="time-block">
+          <span class="time">{{ flight.departureTime | date:'HH:mm' }}</span>
+          <span class="date">{{ flight.departureTime | date:'dd MMM' }}</span>
+        </div>
+
+        <div class="duration-block">
+          <span class="duration-label">{{ flight.duration }}</span>
+          <div class="path-line">
+            <span class="dot"></span>
+            <hr />
+            <span class="dot"></span>
+          </div>
+          <span class="cabin-badge">{{ flight.cabinClass }}</span>
+        </div>
+
+        <div class="time-block text-right">
+          <span class="time">{{ flight.arrivalTime | date:'HH:mm' }}</span>
+          <span class="date">{{ flight.arrivalTime | date:'dd MMM' }}</span>
+        </div>
+      </div>
+
+      <div class="price-action">
+        <div class="price-tag">
+          <span class="pp-label">Total</span>
+          <span class="amount">${{ flight.totalPrice }}</span>
+        </div>
+        <button class="btn-book" (click)="onBookClick(flight)">Book Now</button>
+      </div>
+    </div>
+  </div>
+</div>
