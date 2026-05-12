@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FlightService } from './services/flight';
 import { FlightSearchResponse } from './models/flight.model';
@@ -15,8 +15,8 @@ export class AppComponent {
   private fb = inject(FormBuilder);
   private flightService = inject(FlightService);
   selectedFlight: FlightSearchResponse | null = null;
-  flights: FlightSearchResponse[] = [];
-  loading = false;
+  flights = signal<FlightSearchResponse[]>([]);
+  loading = signal<boolean>(false);
 
   searchForm = this.fb.group({
     origin: ['', [Validators.required, Validators.minLength(3)]],
@@ -29,7 +29,9 @@ export class AppComponent {
   onSearch() {
     if (this.searchForm.invalid) return;
 
-    this.loading = true;
+    this.loading.set(true);
+    this.flights.set([]);
+    
     const val = this.searchForm.value;
 
     this.flightService.searchFlights(
@@ -40,12 +42,14 @@ export class AppComponent {
       val.cabinClass!
     ).subscribe({
       next: (data) => {
-        this.flights = data;
-        this.loading = false;
+        console.log('Data received:', data);
+        this.flights.set(data);
+        this.loading.set(false);
       },
       error: (err) => {
-        console.error('Search failed', err);
-        this.loading = false;
+        console.error('Search failed:', err);
+        alert('Error fetching flights. Is the backend running?');
+        this.loading.set(false);
       }
     });
   }
