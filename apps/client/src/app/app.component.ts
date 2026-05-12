@@ -23,6 +23,7 @@ export class AppComponent {
   isBooking = signal<boolean>(false);
   bookingStatus = signal<string | null>(null);
   searchPerformed = signal<boolean>(false);
+  searchResetCounter = signal(0);
 
   lastSearchParams: any = null;
 
@@ -70,7 +71,6 @@ export class AppComponent {
       finalize(() => this.loading.set(false))
     ).subscribe({
       next: (data) => {
-        console.log('Resultados de API:', data);
         this.flights.set(data);
       },
       error: (err) => console.error('Error en API:', err)
@@ -78,7 +78,7 @@ export class AppComponent {
   }
 
   onSort(criteria: string) {
-    const sorted = [...this.flights()]; // Copia del array
+    const sorted = [...this.flights()];
     
     if (criteria === 'price') {
       sorted.sort((a, b) => a.totalPrice - b.totalPrice);
@@ -121,8 +121,12 @@ export class AppComponent {
         this.bookingStatus.set(`Success! Ref: ${res.bookingReference}`);
         this.isBooking.set(false);
         this.flights.set([]);
-
+        this.searchPerformed.set(false);
+        this.lastSearchParams = null;
         this.selectedFlight = null;
+
+        this.searchResetCounter.update(v => v + 1);
+
         setTimeout(() => this.bookingStatus.set(null), 5000);
       },
       error: (err) => {

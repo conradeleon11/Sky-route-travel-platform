@@ -6,6 +6,7 @@
   <app-flight-search 
     [airports]="airports" 
     [loading]="loading()" 
+    [resetTrigger]="searchResetCounter()" 
     (search)="onSearch($event)">
   </app-flight-search>
 
