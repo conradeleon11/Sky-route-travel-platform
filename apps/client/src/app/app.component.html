@@ -58,7 +58,40 @@
     </div>
   </div>
 
-  <div *ngIf="flights().length === 0 && !loading()" class="no-results">
+  <div *ngIf="flights().length === 0 && !loading() && !bookingStatus()" class="no-results">
     <p>No flights found. Try a new search!</p>
   </div>
+</div>
+
+<div *ngIf="isBooking()" class="booking-modal" style="background: #eee; padding: 20px; border-radius: 8px; margin-top: 20px;">
+  <h2>Complete your booking for {{ selectedFlight?.flightNumber }}</h2>
+  <p>Provider: {{ selectedFlight?.providerName }} | Price: ${{ selectedFlight?.totalPrice }}</p>
+
+  <form [formGroup]="bookingForm" (ngSubmit)="confirmBooking()">
+    <div class="form-group">
+      <label>Full Name</label>
+      <input formControlName="fullName" placeholder="John Doe" />
+    </div>
+    
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" formControlName="email" placeholder="john@example.com" />
+    </div>
+
+    <div class="form-group">
+      <label>Document Number</label>
+      <input formControlName="documentNumber" placeholder="ID or Passport" />
+    </div>
+
+    <div style="margin-top: 15px;">
+      <button type="submit" [disabled]="bookingForm.invalid || loading()">
+        {{ loading() ? 'Processing...' : 'Confirm Reservation' }}
+      </button>
+      <button type="button" (click)="cancelBooking()" style="background: #666; margin-left: 10px;">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div *ngIf="bookingStatus()" class="status-message" style="padding: 15px; background: #d4edda; margin-top: 10px;">
+  {{ bookingStatus() }}
 </div>
